@@ -2,6 +2,8 @@ clc;
 close all;
 clear all;
 
+saveData = false;
+
 %=========================================================================
 %User-defined Parameters
 %=========================================================================
@@ -65,7 +67,7 @@ xmax = max(Xseq); xmin = min(Xseq);
 
 TN_clean = (ymax-ymin)*(Xseq-xmin)/(xmax-xmin) + ymin;
 
-save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\TN_clean','TN_clean');
+% save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\TN_clean','TN_clean');
 
 %==========================================================================
 
@@ -75,17 +77,17 @@ sig = sqrt(sigPwr/(10^(snr/10)));
 
 TN_noisy = TN_clean + sig*randn(length(TN_clean),1);
 
-save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\TN_noisy','TN_noisy');
+% save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\TN_noisy','TN_noisy');
 
 tt_clean = TN_clean(801:900);
 
-save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\tt_clean','tt_clean');
+% save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\tt_clean','tt_clean');
 
 tt_noisy = tt_clean + sig*randn(length(tt_clean),1);
 
-save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\tt_noisy','tt_noisy');
+% save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\tt_noisy','tt_noisy');
 
-save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\sig','sig');
+% save('C:\Haran\Research\NN\RMLP\NoisyMG\Web\sig','sig');
 
 %==========================================================================
 figure;

@@ -16,7 +16,9 @@ nexpt = 50;
 
 nrun = 10;
 
-nex_tn = 100;
+% Number of training samples
+nex_tn  = 100;
+nex_tst = 100;
 
 lambda = 1-5e-4; 
 
@@ -40,14 +42,15 @@ dE = nin;       % embedding dim.
 % Generate input-output data:
 %==========================================================================
 
+% Training Data
 load TN_noisy ;
-
 load TN_clean ;
 
+% Test Data
 load tt_noisy ;
-
 load tt_clean ;
 
+% Signal power aka variance?
 load sig ;
 
 Rs = sig^2;
@@ -80,10 +83,9 @@ for expt = 1:nexpt
         
         fprintf('run in process = %d\n',run); 
         
+        % Get the data
         ptr = PtrArray(run);
-        
         tn_clean = TN_clean(ptr:ptr+nex_tn-1);
-        
         tn_noisy = TN_noisy(ptr:ptr+nex_tn-1);
     
         %==================================================================
@@ -110,6 +112,7 @@ for expt = 1:nexpt
             
             [xkk,Sxkk,o1] = SCKFst_update(xkk1,Sxkk1,wk1k1,o1,tn_noisy(ex)); 
             
+            % Save Training results
             xestArray = [xestArray xkk(end)];
             
             
@@ -142,12 +145,13 @@ for expt = 1:nexpt
         
         o1_tt = zeros(nhid,1);
 
-        for ex = 1:100            
+        for ex = 1:nex_tst % Iterate through test cases
            
             [xkk1_tt,Sxkk1_tt] = SCKFst_predict(xkk_tt,Sxkk_tt,wkk,o1_tt); 
         
             [xkk_tt,Sxkk_tt,o1_tt,nis] = SCKFst_update(xkk1_tt,Sxkk1_tt,wkk,o1_tt,tt_noisy(ex));           
-                
+            
+            % Save Testing results
             xestArray_tt = [xestArray_tt xkk_tt(end)];
             
             nisArray(ex) = nis;
