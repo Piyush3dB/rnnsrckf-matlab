@@ -1,19 +1,21 @@
 clc;
 close all;
-clear all;
+clear;
 
 randn('seed',unidrnd(100));
 
 randn('state',sum(100*clock)); 
 
-global  Qs Rs Rw nin nout nhid dE tau nwts lambda;
+global  Qs Rs Rw nin nout nbia nhid dE tau nwts lambda;
 
 %=========================================================================
 %  user-defined parameters
 %=========================================================================
 
+% Number of experiments
 nexpt = 50;
 
+% Number of runs per experiment
 nrun = 10;
 
 % Number of training samples
@@ -28,15 +30,17 @@ Lp  = 20;       % length of priming time in test
 
 Lw  = 10;       % length of sweeping window
 
-nin = 7;
-
+% Network dimensions
+nin  = 7;
 nout = 1;
-
 nhid = 5;
+nbia = 1;
 
-nwts = nhid*(nin+1+nhid)+nout*(nhid+1);
+% Total number of weights
+nwts = nhid*nin + nhid*(nhid+nbia) + nout*(nhid+nbia);
 
-dE = nin;       % embedding dim.
+% Embedding dimension
+dE = nin;
 
 %==========================================================================
 % Generate input-output data:
@@ -54,9 +58,7 @@ load tt_clean ;
 load sig ;
 
 Rs = sig^2;
-
 Qs = 0.1*Rs;
-
 Rw = Rs + Qs; 
 
 PtrArray = ceil((500-(nin+nout+nex_tn))*rand(1,nrun));
@@ -71,8 +73,9 @@ for expt = 1:nexpt
     fprintf('expt in process = %d\n',expt); 
     fprintf('=====================================\n');    
    
-    W1 = ( rand(nhid,nin+1+nhid) - 0.5 )*sqrt(3/(nin+1+nhid));
-    W2 = ( rand(nout,nhid+1) - 0.5 )*sqrt(3/(nhid+1));
+    % Initialise weights
+    W1 = ( rand(nhid , nin+1+nhid) - 0.5 ) * sqrt(3/(nin+1+nhid));
+    W2 = ( rand(nout , nhid+1    ) - 0.5 ) * sqrt(3/(nhid+1    ));
     W = [W1(:); W2(:)];
     
     wkk = W;
@@ -98,25 +101,29 @@ for expt = 1:nexpt
             
         xestArray = [];
         
+        % Previous output
         o1 = zeros(nhid,1);
    
+        % Iterate through number of training samples
         for ex = 1:nex_tn
             
             xk1k1 = xkk;
             
             wk1k1 = wkk;
-                          
-            [xkk1,Sxkk1] = SCKFst_predict(xkk,Sxkk,wkk,o1);            
-        
-            [wkk,Swkk] = SCKFwt(wkk,Swkk,xk1k1,o1,tn_noisy(ex));
             
-            [xkk,Sxkk,o1] = SCKFst_update(xkk1,Sxkk1,wk1k1,o1,tn_noisy(ex)); 
+            dataPt = tn_noisy(ex);
+                          
+            [xkk1, Sxkk1] = SCKFst_predict(xkk, Sxkk, wkk, o1);            
+        
+            [wkk, Swkk] = SCKFwt(wkk, Swkk, xk1k1, o1, dataPt);
+            
+            [xkk, Sxkk, o1] = SCKFst_update(xkk1, Sxkk1, wk1k1, o1, dataPt); 
             
             % Save Training results
             xestArray = [xestArray xkk(end)];
             
             
-        end; %end of tn exampls
+        end; %end of tn examples
         
         MSE_tn(expt,run) = mse(tn_clean' - xestArray);
        
@@ -178,13 +185,9 @@ for expt = 1:nexpt
     end; % end of all epochs
     
     ttstat = [];
-    
     for i = Lw+Lp:100
-        
         ttstat = [ttstat  mean(nisArray(i+1-Lw:i))];
-        
-    end; 
-    
+    end
     TTSTAT = [TTSTAT; ttstat];
     
 end;    % end of expt

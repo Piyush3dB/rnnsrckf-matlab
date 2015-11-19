@@ -28,13 +28,18 @@ function Xout = StateEq(X,W,o1)
 
 global nhid nin nout;
 
-W1 = reshape( W(1:nhid*(nin+1+nhid)),nhid,nin+1+nhid );
+W1 = reshape( W(1:nhid*(nin+1+nhid))    ,  nhid, nin+1+nhid );
     
-W2 = reshape( W(nhid*(nin+1+nhid)+1:end),nout,nhid+1);
+W2 = reshape( W(nhid*(nin+1+nhid)+1:end),  nout, nhid+1     );
 
 nPts = 2*nin;
-    
-u1 = W1*[X;ones(1,nPts);repmat(o1,1,nPts)];
+
+v2 = ones(1,nPts);
+v3 = repmat(o1,1,nPts);
+
+Ar = [ X ; v2 ; v3 ];
+
+u1 = W1 * Ar;
 
 o1_n = (2./(1+exp(-2*u1)) - 1);  
     
